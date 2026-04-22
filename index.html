@@ -68,31 +68,49 @@
     </div>
     <script>
         const prizeData = {
-            high: [{name:"上上籤",color:"#F8BBD0"},{name:"頭獎",color:"#E1BEE7"}],
-            mid: [{name:"二獎",color:"#B2EBF2"},{name:"三獎",color:"#C8E6C9"}],
-            low: {name:"四獎",color:"#FFF9C4"},
-            cons: {name:"安慰獎",color:"#BBDEFB"},
-            retry: {name:"再接再厲",color:"#F5F5F5"}
+            s_high: {name:"上上籤", color:"#F8BBD0"},
+            high: {name:"頭獎", color:"#E1BEE7"},
+            mid2: {name:"二獎", color:"#B2EBF2"},
+            mid3: {name:"三獎", color:"#C8E6C9"},
+            low: {name:"四獎", color:"#FFF9C4"},
+            cons: {name:"安慰獎", color:"#BBDEFB"},
+            retry: {name:"再接再厲", color:"#F5F5F5"}
         };
 
-        // 建立 50 格的獎項陣列
+        // 建立 50 格初始為「再接再厲」
         let prizes = Array(50).fill(prizeData.retry);
 
-        // 精心設計的交錯分布位置 (索引值從 0 到 49)
+        // 分布配置（總計 26 個中獎格）
         const distribution = [
-            { idx: 0,  p: prizeData.high[0] }, // 上上籤
-            { idx: 6,  p: prizeData.cons },    // 安慰獎
-            { idx: 12, p: prizeData.mid[1] },  // 三獎
-            { idx: 18, p: prizeData.cons },    // 安慰獎
-            { idx: 25, p: prizeData.low },     // 四獎
-            { idx: 31, p: prizeData.high[1] }, // 頭獎
-            { idx: 37, p: prizeData.cons },    // 安慰獎
-            { idx: 43, p: prizeData.mid[0] }   // 二獎
+            { idx: 0,  p: prizeData.s_high }, // 上上籤 (1)
+            { idx: 2,  p: prizeData.cons },   // 安慰獎 (1)
+            { idx: 4,  p: prizeData.high },   // 頭獎 (1)
+            { idx: 6,  p: prizeData.mid3 },   // 三獎 (1)
+            { idx: 8,  p: prizeData.cons },   // 安慰獎 (2)
+            { idx: 10, p: prizeData.mid2 },   // 二獎 (1)
+            { idx: 12, p: prizeData.low },    // 四獎 (1)
+            { idx: 14, p: prizeData.cons },   // 安慰獎 (3)
+            { idx: 16, p: prizeData.mid3 },   // 三獎 (2)
+            { idx: 18, p: prizeData.cons },   // 安慰獎 (4)
+            { idx: 20, p: prizeData.high },   // 頭獎 (2)
+            { idx: 22, p: prizeData.mid3 },   // 三獎 (3)
+            { idx: 24, p: prizeData.cons },   // 安慰獎 (5)
+            { idx: 26, p: prizeData.mid2 },   // 二獎 (2)
+            { idx: 28, p: prizeData.low },    // 四獎 (2)
+            { idx: 30, p: prizeData.cons },   // 安慰獎 (6)
+            { idx: 32, p: prizeData.mid3 },   // 三獎 (4)
+            { idx: 34, p: prizeData.cons },   // 安慰獎 (7)
+            { idx: 36, p: prizeData.mid2 },   // 二獎 (3)
+            { idx: 38, p: prizeData.low },    // 四獎 (3)
+            { idx: 40, p: prizeData.cons },   // 安慰獎 (8)
+            { idx: 42, p: prizeData.mid3 },   // 三獎 (5)
+            { idx: 44, p: prizeData.cons },   // 安慰獎 (9)
+            { idx: 46, p: prizeData.low },    // 四獎 (4)
+            { idx: 48, p: prizeData.cons },   // 安慰獎 (10)
+            { idx: 49, p: prizeData.low }     // 四獎 (5)
         ];
 
-        distribution.forEach(item => {
-            prizes[item.idx] = item.p;
-        });
+        distribution.forEach(item => { prizes[item.idx] = item.p; });
 
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
@@ -111,49 +129,35 @@
                 ctx.moveTo(400, 400);
                 ctx.arc(400, 400, 380, ang, ang + arc); 
                 ctx.fill();
-                ctx.strokeStyle = "rgba(0,0,0,0.02)"; 
+                ctx.strokeStyle = "rgba(0,0,0,0.05)"; 
                 ctx.stroke();
                 
                 ctx.save(); 
                 ctx.translate(400, 400); 
                 ctx.rotate(ang + arc/2);
                 ctx.fillStyle = "#5D4037"; 
-                ctx.font = "bold 16px Arial"; 
-                ctx.fillText(p.name, 260, 6); 
+                ctx.font = "bold 14px Arial"; // 格數變多，字體調小一點
+                ctx.fillText(p.name, 240, 5); 
                 ctx.restore();
             });
-            ctx.beginPath(); ctx.arc(400, 400, 20, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill();
+            ctx.beginPath(); ctx.arc(400, 400, 25, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill();
         }
 
         spinBtn.onclick = () => {
             if (isSpinning) return;
-            isSpinning = true; 
-            spinBtn.disabled = true; 
-            resultDiv.innerText = "";
-            
-            // 隨機增加旋轉圈數與角度
-            let totalRotation = 40 + Math.random() * 30; 
+            isSpinning = true; spinBtn.disabled = true; resultDiv.innerText = "";
+            let totalRotation = 50 + Math.random() * 40; 
             let start = null;
-            let duration = 4000;
-
             function ani(ts) {
                 if(!start) start = ts;
                 let progress = ts - start;
-                let t = progress / duration;
-                
-                // 緩動公式讓旋轉更自然
-                let easing = 1 - Math.pow(1 - t, 4);
-                let currentTotal = totalRotation * easing;
-                
-                currentRot = currentTotal;
+                let t = progress / 5000; // 轉動時間稍微加長到 5 秒，更有張力
+                let easing = 1 - Math.pow(1 - t, 5);
+                currentRot = totalRotation * easing;
                 draw();
-                
-                if(progress < duration) {
-                    requestAnimationFrame(ani);
-                } else {
-                    isSpinning = false; 
-                    spinBtn.disabled = false;
-                    // 計算指針所對應的正確索引
+                if(progress < 5000) requestAnimationFrame(ani);
+                else {
+                    isSpinning = false; spinBtn.disabled = false;
                     const final = (1.5 * Math.PI - (currentRot % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
                     const idx = Math.floor(final / ((2*Math.PI)/50));
                     resultDiv.innerText = "獲得獎項：" + prizes[idx].name;
