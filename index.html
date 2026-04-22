@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>camia幸運輪盤</title>
+    <title>413幸運輪盤</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
         body { 
             font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #FDFBF0; /* 溫暖米色底 */
+            background-color: #FDFBF0; 
             color: #5D4037; 
             height: 100dvh;
             margin: 0;
@@ -42,7 +42,7 @@
             transform: translateX(-50%); 
             width: 30px; 
             height: 40px; 
-            background: #FF8A80; /* 珊瑚色指針 */
+            background: #FF8A80; 
             clip-path: polygon(50% 100%, 0 0, 100% 0); 
             z-index: 20; 
         }
@@ -56,7 +56,7 @@
 </head>
 <body>
     <div class="app-container">
-        <h1 class="text-4xl font-black text-center tracking-widest text-[#5D4037]">camia幸運輪盤</h1>
+        <h1 class="text-4xl font-black text-center tracking-widest text-[#5D4037]">413幸運輪盤</h1>
         <div class="wheel-box">
             <div class="pointer"></div>
             <canvas id="wheelCanvas" width="800" height="800"></canvas>
@@ -74,9 +74,25 @@
             cons: {name:"安慰獎",color:"#BBDEFB"},
             retry: {name:"再接再厲",color:"#F5F5F5"}
         };
+
+        // 建立 50 格的獎項陣列
         let prizes = Array(50).fill(prizeData.retry);
-        const winConfig = [prizeData.high[0], prizeData.cons, prizeData.mid[1], prizeData.cons, prizeData.low, prizeData.high[1], prizeData.cons, prizeData.mid[0]];
-        winConfig.forEach((p, i) => { prizes[i * 6] = p; });
+
+        // 精心設計的交錯分布位置 (索引值從 0 到 49)
+        const distribution = [
+            { idx: 0,  p: prizeData.high[0] }, // 上上籤
+            { idx: 6,  p: prizeData.cons },    // 安慰獎
+            { idx: 12, p: prizeData.mid[1] },  // 三獎
+            { idx: 18, p: prizeData.cons },    // 安慰獎
+            { idx: 25, p: prizeData.low },     // 四獎
+            { idx: 31, p: prizeData.high[1] }, // 頭獎
+            { idx: 37, p: prizeData.cons },    // 安慰獎
+            { idx: 43, p: prizeData.mid[0] }   // 二獎
+        ];
+
+        distribution.forEach(item => {
+            prizes[item.idx] = item.p;
+        });
 
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
@@ -90,30 +106,54 @@
             ctx.clearRect(0,0,800,800);
             prizes.forEach((p, i) => {
                 const ang = i * arc + currentRot;
-                ctx.beginPath(); ctx.fillStyle = p.color; ctx.moveTo(400, 400);
-                ctx.arc(400, 400, 380, ang, ang + arc); ctx.fill();
-                ctx.strokeStyle = "rgba(0,0,0,0.02)"; ctx.stroke();
-                ctx.save(); ctx.translate(400, 400); ctx.rotate(ang + arc/2);
-                ctx.fillStyle = "#5D4037"; ctx.font = "bold 16px Arial"; ctx.fillText(p.name, 260, 6); ctx.restore();
+                ctx.beginPath(); 
+                ctx.fillStyle = p.color; 
+                ctx.moveTo(400, 400);
+                ctx.arc(400, 400, 380, ang, ang + arc); 
+                ctx.fill();
+                ctx.strokeStyle = "rgba(0,0,0,0.02)"; 
+                ctx.stroke();
+                
+                ctx.save(); 
+                ctx.translate(400, 400); 
+                ctx.rotate(ang + arc/2);
+                ctx.fillStyle = "#5D4037"; 
+                ctx.font = "bold 16px Arial"; 
+                ctx.fillText(p.name, 260, 6); 
+                ctx.restore();
             });
             ctx.beginPath(); ctx.arc(400, 400, 20, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill();
         }
 
         spinBtn.onclick = () => {
             if (isSpinning) return;
-            isSpinning = true; spinBtn.disabled = true; resultDiv.innerText = "";
-            let totalRotation = 30 + Math.random() * 20; 
+            isSpinning = true; 
+            spinBtn.disabled = true; 
+            resultDiv.innerText = "";
+            
+            // 隨機增加旋轉圈數與角度
+            let totalRotation = 40 + Math.random() * 30; 
             let start = null;
+            let duration = 4000;
+
             function ani(ts) {
                 if(!start) start = ts;
                 let progress = ts - start;
-                let t = progress / 4000;
+                let t = progress / duration;
+                
+                // 緩動公式讓旋轉更自然
                 let easing = 1 - Math.pow(1 - t, 4);
-                currentRot += (totalRotation * (1-easing) * 0.1);
+                let currentTotal = totalRotation * easing;
+                
+                currentRot = currentTotal;
                 draw();
-                if(progress < 4000) requestAnimationFrame(ani);
-                else {
-                    isSpinning = false; spinBtn.disabled = false;
+                
+                if(progress < duration) {
+                    requestAnimationFrame(ani);
+                } else {
+                    isSpinning = false; 
+                    spinBtn.disabled = false;
+                    // 計算指針所對應的正確索引
                     const final = (1.5 * Math.PI - (currentRot % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
                     const idx = Math.floor(final / ((2*Math.PI)/50));
                     resultDiv.innerText = "獲得獎項：" + prizes[idx].name;
