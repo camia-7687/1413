@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>camia幸運輪盤</title>
+    <title>413幸運輪盤</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
         body { 
             font-family: 'Noto Sans TC', sans-serif; 
-            background: radial-gradient(circle, #0f172a 0%, #020617 100%); 
-            color: white;
+            /* 1. 背景改為溫暖的米色 */
+            background-color: #FDFBF0; 
+            color: #5D4037; /* 深咖啡色文字，更柔和 */
             height: 100dvh;
             margin: 0;
             overflow: hidden;
@@ -18,14 +19,13 @@
             flex-direction: column;
             align-items: center;
         }
-        /* 讓內容自動垂直分配空間 */
         .app-container {
             width: 100%;
             max-width: 500px;
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-around; /* 均勻分配標題、輪盤、按鈕的距離 */
+            justify-content: space-around; 
             padding: 20px 0;
         }
         .wheel-box { 
@@ -43,23 +43,26 @@
             transform: translateX(-50%); 
             width: 30px; 
             height: 40px; 
-            background: #ef4444; 
+            /* 指針改為柔和的珊瑚紅 */
+            background: #FF8A80; 
             clip-path: polygon(50% 100%, 0 0, 100% 0); 
             z-index: 20; 
-            filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6)); 
+            filter: drop-shadow(0 0 8px rgba(255, 138, 128, 0.4)); 
         }
-        canvas { width: 100% !important; height: 100% !important; border-radius: 50%; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+        canvas { width: 100% !important; height: 100% !important; border-radius: 50%; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .btn-spin { 
-            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); 
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+            /* 按鈕改為馬卡龍粉藍到粉綠的漸層 */
+            background: linear-gradient(135deg, #B2EBF2 0%, #C8E6C9 100%); 
+            color: #455A64; /* 按鈕文字用深灰藍 */
+            box-shadow: 0 4px 15px rgba(178, 235, 242, 0.5);
         }
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <h1 class="text-4xl font-black text-center text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-yellow-500 tracking-widest">
-            camia幸運輪盤
+        <h1 class="text-4xl font-black text-center tracking-widest text-[#5D4037]">
+            413幸運輪盤
         </h1>
 
         <div class="wheel-box">
@@ -68,20 +71,26 @@
         </div>
 
         <div class="flex flex-col items-center gap-4">
-            <button id="spinBtn" class="btn-spin text-white font-black py-4 px-12 rounded-full text-2xl active:scale-95 transition-transform disabled:opacity-50">
+            <button id="spinBtn" class="btn-spin font-black py-4 px-12 rounded-full text-2xl active:scale-95 transition-transform disabled:opacity-50">
                 開始旋轉
             </button>
-            <div id="result" class="text-2xl font-bold text-yellow-400 h-8 text-center drop-shadow-md"></div>
+            <div id="result" class="text-2xl font-bold text-[#FF8A80] h-8 text-center drop-shadow-sm"></div>
         </div>
     </div>
 
     <script>
+        // 2. 重新編排馬卡龍色調獎項
         const prizeData = {
-            high: [{name:"上上籤",color:"#FFD700"},{name:"頭獎",color:"#FF1493"}],
-            mid: [{name:"二獎",color:"#FF8C00"},{name:"二獎",color:"#FF8C00"},{name:"三獎",color:"#9333ea"},{name:"三獎",color:"#9333ea"},{name:"三獎",color:"#9333ea"}],
-            low: Array(5).fill({name:"四獎",color:"#3b82f6"}),
-            cons: Array(10).fill({name:"安慰獎",color:"#10b981"}),
-            retry: {name:"再接再厲",color:"#475569"}
+            // 上上籤: 櫻花粉, 頭獎: 薰衣草紫
+            high: [{name:"上上籤",color:"#F8BBD0"},{name:"頭獎",color:"#E1BEE7"}],
+            // 二獎: 蒂芬妮藍, 三獎: 薄荷綠
+            mid: [{name:"二獎",color:"#B2EBF2"},{name:"二獎",color:"#B2EBF2"},{name:"三獎",color:"#C8E6C9"},{name:"三獎",color:"#C8E6C9"},{name:"三獎",color:"#C8E6C9"}],
+            // 四獎: 奶油黃
+            low: Array(5).fill({name:"四獎",color:"#FFF9C4"}),
+            // 安慰獎: 天空藍
+            cons: Array(10).fill({name:"安慰獎",color:"#BBDEFB"}),
+            // 再接再厲: 柔和灰
+            retry: {name:"再接再厲",color:"#F5F5F5"}
         };
 
         let prizes = Array(50).fill(prizeData.retry);
@@ -102,10 +111,12 @@
             prizes.forEach((p, i) => {
                 const ang = i * arc + currentRot;
                 ctx.beginPath(); ctx.fillStyle = p.color; ctx.moveTo(400, 400);
+                // 畫弧形線條用淺灰，更精緻
                 ctx.arc(400, 400, 380, ang, ang + arc); ctx.fill();
-                ctx.strokeStyle = "rgba(255,255,255,0.1)"; ctx.lineWidth = 1; ctx.stroke();
+                ctx.strokeStyle = "rgba(0,0,0,0.03)"; ctx.lineWidth = 1; ctx.stroke();
                 ctx.save(); ctx.translate(400, 400); ctx.rotate(ang + arc/2);
-                ctx.fillStyle = (p.color === "#FFD700") ? "black" : "white";
+                // 輪盤文字顏色改為深柔和咖啡色
+                ctx.fillStyle = "#5D4037";
                 ctx.font = "bold 16px Arial"; ctx.fillText(p.name, 260, 6); ctx.restore();
             });
             // 畫中心圓
@@ -126,7 +137,7 @@
                 if(!start) start = ts;
                 let progress = ts - start;
                 let t = progress / spinTime;
-                let easing = 1 - Math.pow(1 - t, 4); // 減速效果
+                let easing = 1 - Math.pow(1 - t, 4); 
                 currentRot = initialRot + totalRotation * easing;
                 draw();
                 if(progress < spinTime) requestAnimationFrame(ani);
