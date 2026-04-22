@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸運大輪盤 - 精密均衡版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background: radial-gradient(circle, #0f172a 0%, #020617 100%); color: white; }
+        .wheel-container { position: relative; width: 450px; height: 450px; margin: 0 auto; }
+        .pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 34px; height: 48px; background: #ef4444; clip-path: polygon(50% 100%, 0 0, 100% 0); z-index: 20; filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6)); }
+        canvas { border-radius: 50%; box-shadow: 0 0 60px rgba(0,0,0,0.8); }
+        .btn-spin { background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); transition: all 0.3s ease; }
+        .btn-spin:hover:not(:disabled) { transform: scale(1.05); box-shadow: 0 0 20px rgba(168, 85, 247, 0.5); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-8">
+    <h1 class="text-3xl font-bold mb-8">50格精密均衡輪盤</h1>
+    <div class="wheel-container mb-8">
+        <div class="pointer"></div>
+        <canvas id="wheelCanvas" width="450" height="450"></canvas>
+    </div>
+    <button id="spinBtn" class="btn-spin text-white font-bold py-4 px-16 rounded-full text-xl shadow-xl disabled:opacity-50">開始旋轉</button>
+    <div id="result" class="mt-8 text-2xl font-bold text-yellow-400"></div>
+
+    <script>
+        const prizeData = {
+            high: [{name:"上上籤",color:"#FFD700"},{name:"頭獎",color:"#FF1493"}],
+            mid: [{name:"二獎",color:"#FF8C00"},{name:"二獎",color:"#FF8C00"},{name:"三獎",color:"#9333ea"},{name:"三獎",color:"#9333ea"},{name:"三獎",color:"#9333ea"}],
+            low: Array(5).fill({name:"四獎",color:"#3b82f6"}),
+            cons: Array(10).fill({name:"安慰獎",color:"#10b981"}),
+            retry: {name:"再接再厲",color:"#475569"}
+        };
+
+        let prizes = Array(50).fill(prizeData.retry);
+        const winners = [prizeData.high[0], prizeData.cons[0], prizeData.mid[2], prizeData.cons[1], prizeData.low[0], prizeData.high[1], prizeData.cons[2], prizeData.mid[3], prizeData.cons[3], prizeData.low[1], prizeData.mid[0], prizeData.cons[4], prizeData.low[2], prizeData.cons[5], prizeData.mid[4], prizeData.cons[6], prizeData.low[3], prizeData.cons[7], prizeData.mid[1], prizeData.cons[8], prizeData.low[4], prizeData.cons[9]];
+
+        let step = 50 / winners.length;
+        winners.forEach((p, i) => { prizes[Math.floor(i * step)] = p; });
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentRot = 0;
+
+        function draw() {
+            const arc = (2 * Math.PI) / 50;
+            prizes.forEach((p, i) => {
+                const ang = i * arc + currentRot;
+                ctx.beginPath(); ctx.fillStyle = p.color; ctx.moveTo(225, 225);
+                ctx.arc(225, 225, 220, ang, ang + arc); ctx.fill();
+                ctx.save(); ctx.translate(225, 225); ctx.rotate(ang + arc/2);
+                ctx.fillStyle = "white"; ctx.font = "9px Arial"; ctx.fillText(p.name, 150, 5); ctx.restore();
+            });
+        }
+
+        document.getElementById('spinBtn').onclick = () => {
+            let spin = 2000 + Math.random() * 2000;
+            let start = null;
+            function ani(ts) {
+                if(!start) start = ts;
+                let progress = ts - start;
+                currentRot += (spin * (1 - progress/3000)) * 0.001;
+                draw();
+                if(progress < 3000) requestAnimationFrame(ani);
+                else {
+                    const final = (1.5 * Math.PI - (currentRot % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
+                    const idx = Math.floor(final / ((2*Math.PI)/50));
+                    document.getElementById('result').innerText = "獲得獎項：" + prizes[idx].name;
+                }
+            }
+            requestAnimationFrame(ani);
+        };
+        draw();
+    </script>
+</body>
+</html>
