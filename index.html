@@ -9,9 +9,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
         body { 
             font-family: 'Noto Sans TC', sans-serif; 
-            /* 修改 1：加深米色背景，從原始 `#FDFBF0` 調深 (#F3E5DC) */
-            background-color: #F3E5DC; 
-            color: #5D4037; 
+            /* 修改點：背景色再加深 4 個色階 (#D7C0A7) */
+            background-color: #D7C0A7; 
+            color: #4E342E; 
             height: 100dvh;
             margin: 0;
             overflow: hidden;
@@ -30,53 +30,54 @@
         }
         .wheel-box { 
             position: relative; 
-            width: 90vw; 
-            max-width: 400px; 
-            height: 90vw; 
-            max-height: 400px; 
+            width: 92vw; 
+            max-width: 440px; 
+            height: 92vw; 
+            max-height: 440px; 
             margin: 0 auto; 
         }
         .pointer { 
             position: absolute; 
-            top: -10px; 
+            top: -12px; 
             left: 50%; 
             transform: translateX(-50%); 
-            width: 30px; 
-            height: 40px; 
-            background: #FF8A80; 
+            width: 36px; 
+            height: 46px; 
+            background: #E64A19; 
             clip-path: polygon(50% 100%, 0 0, 100% 0); 
             z-index: 20; 
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
         }
-        canvas { width: 100% !important; height: 100% !important; border-radius: 50%; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+        canvas { width: 100% !important; height: 100% !important; border-radius: 50%; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
         .btn-spin { 
-            background: linear-gradient(135deg, #B2EBF2 0%, #C8E6C9 100%); 
-            color: #455A64;
-            box-shadow: 0 4px 15px rgba(178, 235, 242, 0.4);
+            background: linear-gradient(135deg, #4DD0E1 0%, #81C784 100%); 
+            color: #FFFFFF;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 20px rgba(77, 208, 225, 0.4);
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <h1 class="text-4xl font-black text-center tracking-widest text-[#5D4037]">413 幸運輪盤</h1>
+        <h1 class="text-4xl font-black text-center tracking-widest text-[#4E342E]">413 幸運輪盤</h1>
         <div class="wheel-box">
             <div class="pointer"></div>
             <canvas id="wheelCanvas" width="800" height="800"></canvas>
         </div>
         <div class="flex flex-col items-center gap-4">
-            <button id="spinBtn" class="btn-spin font-black py-4 px-12 rounded-full text-2xl active:scale-95 transition-transform disabled:opacity-50">開始旋轉</button>
-            <div id="result" class="text-2xl font-bold text-[#FF8A80] h-8 text-center"></div>
+            <button id="spinBtn" class="btn-spin font-black py-4 px-14 rounded-full text-2xl active:scale-95 transition-transform disabled:opacity-50">開始旋轉</button>
+            <div id="result" class="text-3xl font-black text-[#E64A19] h-10 text-center"></div>
         </div>
     </div>
     <script>
         const prizeData = {
-            high: [{name:"上上籤",color:"#F8BBD0"},{name:"頭獎",color:"#E1BEE7"}],
-            mid: [{name:"二獎",color:"#B2EBF2"},{name:"三獎",color:"#C8E6C9"}],
-            low: {name:"四獎",color:"#FFF9C4"},
-            cons: {name:"安慰獎",color:"#BBDEFB"},
-            retry: {name:"再接再厲",color:"#F5F5F5"}
+            high: [{name:"上上籤",color:"#F06292"},{name:"頭獎",color:"#BA68C8"}],
+            mid: [{name:"二獎",color:"#4DD0E1"},{name:"三獎",color:"#81C784"}],
+            low: {name:"四獎",color:"#FFF176"},
+            cons: {name:"安慰獎",color:"#64B5F6"},
+            retry: {name:"再接再厲",color:"#BDBDBD"}
         };
         let prizes = Array(50).fill(prizeData.retry);
-        // 設定獲獎位置 (每 6 格一個)
         const winConfig = [prizeData.high[0], prizeData.cons, prizeData.mid[1], prizeData.cons, prizeData.low, prizeData.high[1], prizeData.cons, prizeData.mid[0]];
         winConfig.forEach((p, i) => { prizes[i * 6] = p; });
 
@@ -93,46 +94,45 @@
             prizes.forEach((p, i) => {
                 const ang = i * arc + currentRot;
                 ctx.beginPath(); ctx.fillStyle = p.color; ctx.moveTo(400, 400);
-                ctx.arc(400, 400, 380, ang, ang + arc); ctx.fill();
-                ctx.strokeStyle = "rgba(0,0,0,0.02)"; ctx.stroke();
+                ctx.arc(400, 400, 392, ang, ang + arc); ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.4)"; ctx.lineWidth = 1.5; ctx.stroke();
                 
-                // 找到繪製文字的位置
                 ctx.save(); 
                 ctx.translate(400, 400); 
                 ctx.rotate(ang + arc/2);
                 
-                // 修改文字繪製
-                ctx.fillStyle = "#5D4037"; // 文字顏色
-                // 修改 2：放大字體，從原本約 16px 放大為 20px
-                ctx.font = "bold 20px Arial"; 
-                // 修改 3：移到最外圍，將 `fillText` 的距離 (260) 調大為 (290)
-                ctx.fillText(p.name, 290, 6); // 文字內容, x位置 (距離圓心), y位置
+                // 保留大字體設定
+                ctx.fillStyle = "#3E2723"; 
+                ctx.font = "bold 22px Arial"; 
+                
+                // 保留最外圍位置設定
+                ctx.fillText(p.name, 310, 8); 
                 
                 ctx.restore();
             });
-            // 畫中心點
-            ctx.beginPath(); ctx.arc(400, 400, 20, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill();
+            // 裝飾中心圓
+            ctx.beginPath(); ctx.arc(400, 400, 28, 0, Math.PI*2); ctx.fillStyle = "#fff"; ctx.fill();
+            ctx.strokeStyle = "#D7C0A7"; ctx.lineWidth = 6; ctx.stroke();
         }
 
-        // 旋轉邏輯
         spinBtn.onclick = () => {
             if (isSpinning) return;
             isSpinning = true; spinBtn.disabled = true; resultDiv.innerText = "";
-            let totalRotation = 30 + Math.random() * 20; // 隨機旋轉角度
+            let totalRotation = 45 + Math.random() * 35; 
             let start = null;
             function ani(ts) {
                 if(!start) start = ts;
                 let progress = ts - start;
-                let t = progress / 4000;
-                let easing = 1 - Math.pow(1 - t, 4); // 緩動效果
-                currentRot += (totalRotation * (1-easing) * 0.1);
+                let t = progress / 5000;
+                let easing = 1 - Math.pow(1 - t, 5); 
+                currentRot += (totalRotation * (1-easing) * 0.085);
                 draw();
-                if(progress < 4000) requestAnimationFrame(ani);
+                if(progress < 5000) requestAnimationFrame(ani);
                 else {
                     isSpinning = false; spinBtn.disabled = false;
                     const final = (1.5 * Math.PI - (currentRot % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI);
                     const idx = Math.floor(final / ((2*Math.PI)/50));
-                    resultDiv.innerText = "獲得獎項：" + prizes[idx].name;
+                    resultDiv.innerText = "★ " + prizes[idx].name + " ★";
                 }
             }
             requestAnimationFrame(ani);
